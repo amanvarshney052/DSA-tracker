@@ -96,6 +96,17 @@ export default function LoginPage() {
                             </div>
                         </div>
 
+
+
+                        <div className="flex justify-end">
+                            <Link
+                                href="/forgot-password"
+                                className="text-sm font-medium text-primary-600 hover:text-primary-700"
+                            >
+                                Forgot Password?
+                            </Link>
+                        </div>
+
                         <button
                             type="submit"
                             disabled={loading}
@@ -103,7 +114,7 @@ export default function LoginPage() {
                         >
                             {loading ? 'Signing in...' : 'Sign In'}
                         </button>
-                    </form>
+                    </form >
 
                     <div className="mt-6">
                         <div className="relative">
@@ -135,8 +146,8 @@ export default function LoginPage() {
                             Create one
                         </Link>
                     </p>
-                </div>
-            </motion.div>
-        </div>
+                </div >
+            </motion.div >
+        </div >
     );
 }

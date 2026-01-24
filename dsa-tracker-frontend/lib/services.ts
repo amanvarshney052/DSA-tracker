@@ -8,6 +8,10 @@ export const authAPI = {
         api.post('/auth/login', data),
     getProfile: () => api.get('/auth/profile'),
     updateProfile: (data: any) => api.put('/auth/profile', data),
+    updatePassword: (data: any) => api.put('/auth/updatepassword', data),
+    forgotPassword: (email: string) => api.post('/auth/forgotpassword', { email }),
+    resetPassword: (password: string, token: string) =>
+        api.put(`/auth/resetpassword/${token}`, { password }),
 };
 
 // Problems API

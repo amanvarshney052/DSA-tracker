@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import {
     FaArrowLeft,
@@ -13,6 +13,8 @@ import {
     FaSave,
     FaChartLine,
     FaEnvelope,
+    FaLock,
+    FaTimes,
 } from 'react-icons/fa';
 import { authAPI } from '@/lib/services';
 
@@ -22,6 +24,7 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState('');
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         goal: '',
@@ -343,8 +346,16 @@ export default function ProfilePage() {
                                         </div>
                                     </div>
 
-                                    {/* Save Button */}
-                                    <div className="pt-4 flex justify-end">
+                                    {/* Save Button & Change Password */}
+                                    <div className="pt-4 flex items-center justify-end gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswordModal(true)}
+                                            className="px-6 py-3 rounded-xl font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all flex items-center gap-2"
+                                        >
+                                            <FaLock />
+                                            Change Password
+                                        </button>
                                         <button
                                             type="submit"
                                             disabled={saving}
@@ -360,7 +371,198 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+
+            <PasswordModal
+                isOpen={showPasswordModal}
+                onClose={() => setShowPasswordModal(false)}
+            />
         </div>
+    );
+}
+
+function PasswordModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+    const [formData, setFormData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+    });
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
+
+    useEffect(() => {
+        if (!isOpen) {
+            setMessage('');
+            setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        }
+    }, [isOpen]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setMessage('');
+
+        if (formData.newPassword !== formData.confirmPassword) {
+            setMessage('New passwords do not match');
+            return;
+        }
+
+        if (formData.newPassword.length < 6) {
+            setMessage('Password must be at least 6 characters');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            await authAPI.updatePassword({
+                currentPassword: formData.currentPassword,
+                newPassword: formData.newPassword,
+            });
+            setMessage('success: Password updated successfully');
+            setTimeout(() => {
+                onClose();
+            }, 2000);
+        } catch (err: any) {
+            setMessage(err.response?.data?.message || 'Failed to update password');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <>
+                    {/* Backdrop */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 transition-all"
+                    />
+
+                    {/* Modal */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
+                    >
+                        <div className="bg-white rounded-[32px] p-8 w-full max-w-lg shadow-2xl border border-gray-100 pointer-events-auto relative">
+                            <button
+                                onClick={onClose}
+                                className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors bg-slate-50 p-2 rounded-full hover:bg-slate-100"
+                            >
+                                <FaTimes />
+                            </button>
+
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="bg-primary-50 p-3 rounded-2xl text-primary-600 text-xl">
+                                    <FaLock />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-900 font-heading">
+                                        Change Password
+                                    </h2>
+                                    <p className="text-slate-500 text-sm">
+                                        Update your account security
+                                    </p>
+                                </div>
+                            </div>
+
+                            {message && (
+                                <div
+                                    className={`mb-6 p-4 rounded-2xl flex items-center gap-3 text-sm ${message.includes('success')
+                                        ? 'bg-green-50 text-green-700 border border-green-100'
+                                        : 'bg-red-50 text-red-700 border border-red-100'
+                                        }`}
+                                >
+                                    <div className={`w-2 h-2 rounded-full ${message.includes('success') ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                    <span className="font-medium">{message.replace('success: ', '')}</span>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                                        Current Password
+                                    </label>
+                                    <div className="relative">
+                                        <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                        <input
+                                            type="password"
+                                            value={formData.currentPassword}
+                                            onChange={(e) =>
+                                                setFormData({ ...formData, currentPassword: e.target.value })
+                                            }
+                                            placeholder="Enter current password"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 transition-all focus:bg-white placeholder:text-slate-400"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-5">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                                            New Password
+                                        </label>
+                                        <div className="relative">
+                                            <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                            <input
+                                                type="password"
+                                                value={formData.newPassword}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, newPassword: e.target.value })
+                                                }
+                                                placeholder="Min. 6 characters"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 transition-all focus:bg-white placeholder:text-slate-400"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                                            Confirm New Password
+                                        </label>
+                                        <div className="relative">
+                                            <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                            <input
+                                                type="password"
+                                                value={formData.confirmPassword}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, confirmPassword: e.target.value })
+                                                }
+                                                placeholder="Re-enter new password"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 transition-all focus:bg-white placeholder:text-slate-400"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="bg-primary-600 text-white rounded-xl py-3 px-8 font-bold hover:bg-primary-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {loading ? 'Updating...' : 'Update Password'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
     );
 }
 

@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 
-export default function OAuthCallback() {
+function OAuthCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -48,5 +48,13 @@ export default function OAuthCallback() {
                 <h2 className="text-xl font-semibold text-slate-700">Authenticating...</h2>
             </motion.div>
         </div>
+    );
+}
+
+export default function OAuthCallback() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#f4f9f4] flex items-center justify-center">Loading...</div>}>
+            <OAuthCallbackContent />
+        </Suspense>
     );
 }

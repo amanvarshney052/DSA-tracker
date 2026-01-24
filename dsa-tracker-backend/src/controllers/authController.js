@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
+const crypto = require('crypto');
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -180,10 +181,106 @@ const googleCallback = (req, res) => {
     res.redirect(`http://localhost:3000/oauth/callback?token=${token}`);
 };
 
+// @desc    Update user password
+// @route   PUT /api/auth/updatepassword
+// @access  Private
+const updatePassword = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('+password');
+
+        if (user) {
+            // Check current password
+            if (await user.matchPassword(req.body.currentPassword)) {
+                user.password = req.body.newPassword;
+                await user.save();
+                res.json({ message: 'Password updated' });
+            } else {
+                res.status(401).json({ message: 'Invalid current password' });
+            }
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Forgot Password
+// @route   POST /api/auth/forgotpassword
+// @access  Public
+const forgotPassword = async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.body.email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Get reset token
+        const resetToken = user.getResetPasswordToken();
+
+        await user.save({ validateBeforeSave: false });
+
+        // Create reset URL
+        const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+
+        // In a real app, send email here. For now, log to console.
+        console.log('------------------------------------');
+        console.log('PASSWORD RESET LINK (COPY THIS):');
+        console.log(resetUrl);
+        console.log('------------------------------------');
+
+        res.status(200).json({ message: 'Email sent' });
+    } catch (error) {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save({ validateBeforeSave: false });
+        res.status(500).json({ message: 'Email could not be sent' });
+    }
+};
+
+// @desc    Reset Password
+// @route   PUT /api/auth/resetpassword/:resettoken
+// @access  Public
+const resetPassword = async (req, res) => {
+    try {
+        // Get hashed token
+        const resetPasswordToken = crypto
+            .createHash('sha256')
+            .update(req.params.resettoken)
+            .digest('hex');
+
+        const user = await User.findOne({
+            resetPasswordToken,
+            resetPasswordExpire: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid token' });
+        }
+
+        // Set new password
+        user.password = req.body.password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+
+        res.status(200).json({
+            message: 'Password updated success',
+            token: generateToken(user._id),
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getUserProfile,
     updateUserProfile,
     googleCallback,
+    updatePassword,
+    forgotPassword,
+    resetPassword,
 };
