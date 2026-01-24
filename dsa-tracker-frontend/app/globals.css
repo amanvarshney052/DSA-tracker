@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --color-dark-950: #0a0a0f;
+    --color-dark-900: #12121a;
+    --color-dark-800: #1a1a27;
+    --color-dark-700: #2a2a3c;
+    --color-dark-600: #3a3a4f;
+    --color-dark-500: #4a4a62;
+    --color-dark-400: #6b6b85;
+    --color-dark-300: #8c8ca8;
+    --color-dark-200: #adadcb;
+    --color-dark-100: #cecede;
+    --color-dark-50: #efefff;
+
+    --color-primary-600: #7c3aed;
+    --color-primary-500: #8b5cf6;
+
+    --color-accent-600: #db2777;
+    --color-accent-500: #ec4899;
+}
+
+body {
+    font-family: 'Overpass', sans-system-ui, -apple-system, sans-serif;
+    @apply bg-[#f4f9f4] text-slate-700;
+}
+
+.gradient-primary {
+    background: linear-gradient(to right, var(--color-primary-600), var(--color-accent-600));
+}
+
+.glass-effect {
+    background: rgba(26, 26, 39, 0.5);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(42, 42, 60, 1);
+}

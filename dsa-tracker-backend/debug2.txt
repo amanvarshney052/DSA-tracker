@@ -1,0 +1,49 @@
+[dotenv@17.2.3] injecting env (5) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+node:internal/modules/cjs/loader:1246
+  throw err;
+  ^
+
+Error: Cannot find module './cmap/wire_protocol/constants'
+Require stack:
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\node_modules\mongodb\lib\utils.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\node_modules\mongodb\lib\cmap\wire_protocol\responses.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\node_modules\mongodb\lib\operations\delete.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\node_modules\mongodb\lib\bulk\common.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\node_modules\mongoose\lib\drivers\node-mongodb-native\bulkWriteResult.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\node_modules\mongoose\lib\drivers\node-mongodb-native\index.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\node_modules\mongoose\lib\index.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\node_modules\mongoose\index.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\src\models\User.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\src\controllers\authController.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\src\routes\auth.routes.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\src\app.js
+- C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1243:15)
+    at Function._load (node:internal/modules/cjs/loader:1068:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:219:24)
+    at Module.require (node:internal/modules/cjs/loader:1329:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (C:\Users\aman varshney\Desktop\DSA-trackker\dsa-tracker-backend\node_modules\mongodb\lib\utils.js:61:21)
+    at Module._compile (node:internal/modules/cjs/loader:1550:14)
+    at Object..js (node:internal/modules/cjs/loader:1702:10)
+    at Module.load (node:internal/modules/cjs/loader:1307:32) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\node_modules\\mongodb\\lib\\utils.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\node_modules\\mongodb\\lib\\cmap\\wire_protocol\\responses.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\node_modules\\mongodb\\lib\\operations\\delete.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\node_modules\\mongodb\\lib\\bulk\\common.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\bulkWriteResult.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\index.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\node_modules\\mongoose\\lib\\index.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\node_modules\\mongoose\\index.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\src\\models\\User.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\src\\controllers\\authController.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\src\\routes\\auth.routes.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\src\\app.js',
+    'C:\\Users\\aman varshney\\Desktop\\DSA-trackker\\dsa-tracker-backend\\server.js'
+  ]
+}
+
+Node.js v23.2.0
