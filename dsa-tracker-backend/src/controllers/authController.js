@@ -171,9 +171,19 @@ const updateUserProfile = async (req, res) => {
     }
 };
 
+// @desc    Google auth callback
+// @route   GET /api/auth/google/callback
+// @access  Public
+const googleCallback = (req, res) => {
+    const token = generateToken(req.user._id);
+    // Redirect to frontend with token
+    res.redirect(`http://localhost:3000/oauth/callback?token=${token}`);
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getUserProfile,
     updateUserProfile,
+    googleCallback,
 };

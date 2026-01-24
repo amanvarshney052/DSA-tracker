@@ -17,6 +17,10 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const handleGoogleLogin = () => {
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/google`;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -125,6 +129,30 @@ export default function RegisterPage() {
                             {loading ? 'Creating account...' : 'Create Account'}
                         </button>
                     </form>
+
+                    <div className="mt-6">
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white text-gray-500">Or move faster with</span>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleGoogleLogin}
+                            type="button"
+                            className="mt-6 w-full flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-slate-700 rounded-xl py-3 font-semibold transition-all hover:shadow-md"
+                        >
+                            <img
+                                src="https://www.google.com/favicon.ico"
+                                alt="Google"
+                                className="w-5 h-5"
+                            />
+                            Sign up with Google
+                        </button>
+                    </div>
 
                     <p className="text-center text-slate-500 mt-6">
                         Already have an account?{' '}
