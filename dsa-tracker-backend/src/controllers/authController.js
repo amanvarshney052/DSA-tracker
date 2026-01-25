@@ -177,8 +177,9 @@ const updateUserProfile = async (req, res) => {
 // @access  Public
 const googleCallback = (req, res) => {
     const token = generateToken(req.user._id);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     // Redirect to frontend with token
-    res.redirect(`http://localhost:3000/oauth/callback?token=${token}`);
+    res.redirect(`${frontendUrl}/oauth/callback?token=${token}`);
 };
 
 // @desc    Update user password
@@ -222,7 +223,8 @@ const forgotPassword = async (req, res) => {
         await user.save({ validateBeforeSave: false });
 
         // Create reset URL
-        const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
         // In a real app, send email here. For now, log to console.
         console.log('------------------------------------');
