@@ -16,7 +16,10 @@ const dailyRoutes = require('./routes/daily.routes');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:3000', 'https://dsa-tracker-novb.vercel.app', 'https://dsa-tracker-novb-git-main-aman-varshneys-projects-0dbe7fdf.vercel.app'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
