@@ -28,6 +28,7 @@ export default function LoginPage() {
             localStorage.setItem('user', JSON.stringify(response.data));
             router.push('/dashboard');
         } catch (err: any) {
+            console.error('Login Error:', err); // DEBUG: Log error to console
             setError(err.response?.data?.message || 'Login failed');
         } finally {
             setLoading(false);
