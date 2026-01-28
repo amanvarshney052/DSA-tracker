@@ -52,15 +52,18 @@ export default function ForgotPasswordPage() {
                             <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto text-2xl">
                                 ✓
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900">Link Sent!</h3>
+                            <h3 className="text-xl font-bold text-slate-900">OTP Sent!</h3>
                             <p className="text-slate-500">
                                 {message}
                             </p>
+                            <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-sm border border-yellow-200">
+                                <strong>Tip:</strong> If you don't see the email, please check your <strong>Spam</strong> or <strong>Junk</strong> folder.
+                            </div>
                             <Link
-                                href="/login"
+                                href={`/reset-password?email=${encodeURIComponent(email)}`}
                                 className="block w-full bg-primary-600 hover:bg-primary-700 text-white rounded-xl py-3 font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all mt-6"
                             >
-                                Back to Login
+                                Enter OTP
                             </Link>
                         </div>
                     ) : (

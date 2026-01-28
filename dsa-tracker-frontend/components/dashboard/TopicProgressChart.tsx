@@ -78,7 +78,7 @@ export default function TopicProgressChart({ sheetId }: TopicProgressChartProps)
     }
 
     return (
-        <div className="bg-white rounded-[40px] p-8 border border-gray-100 shadow-sm h-[500px] flex flex-col">
+        <div className="bg-white rounded-[40px] p-8 border border-gray-100 shadow-sm h-[400px] md:h-[500px] flex flex-col">
             <h3 className="text-xl font-bold mb-2 text-slate-900">Topic-Wise Progress</h3>
             <p className="text-sm text-slate-500 mb-4">
                 Your top {data.length} topics by problems solved

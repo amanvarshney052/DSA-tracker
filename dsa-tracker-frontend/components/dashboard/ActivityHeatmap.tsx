@@ -123,7 +123,7 @@ export default function ActivityHeatmap({ submissionCalendar, submissionDates }:
     };
 
     return (
-        <div className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 w-full h-[500px] flex flex-col">
+        <div className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 w-full h-[400px] md:h-[500px] flex flex-col">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-auto gap-4">
                 <h3 className="text-slate-900 text-xl font-bold font-heading">Activity</h3>
                 <div className="flex gap-3">

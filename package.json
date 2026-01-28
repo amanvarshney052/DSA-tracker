@@ -1,0 +1,17 @@
+{
+  "name": "dsa-trackker",
+  "version": "1.0.0",
+  "description": "A powerful, full-stack application designed to help you master Data Structures & Algorithms by tracking your progress, consistency, and growth using gamification and detailed analytics.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run dev --prefix dsa-tracker-backend\" \"npm run dev --prefix dsa-tracker-frontend\"",
+    "install-all": "npm install && npm install --prefix dsa-tracker-backend && npm install --prefix dsa-tracker-frontend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

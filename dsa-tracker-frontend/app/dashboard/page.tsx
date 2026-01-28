@@ -26,6 +26,7 @@ import SheetSelectionModal from '@/components/dashboard/SheetSelectionModal';
 import SheetSwitcher from '@/components/dashboard/SheetSwitcher';
 import SmartInsightsCard from '@/components/dashboard/SmartInsightsCard';
 import DailyChallengeCard from '@/components/dashboard/DailyChallengeCard';
+import MobileNav from '@/components/ui/MobileNav';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -101,16 +102,21 @@ export default function DashboardPage() {
         <div className="min-h-screen bg-[#f4f9f4]">
             {/* Header */}
             <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
-                <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-                    <div className="flex items-center gap-8">
+                <nav className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center relative">
+                    <div className="flex items-center gap-4 sm:gap-8">
+                        {/* Mobile Menu Button - Visible only on mobile */}
+                        <MobileNav role={user?.role} />
+
                         <Link href="/dashboard" className="flex items-center gap-2">
                             <div className="bg-primary-50 p-2 rounded-xl">
                                 <FaCode className="text-primary-600 text-xl" />
                             </div>
-                            <span className="text-xl font-heading font-bold text-primary-900">
+                            <span className="text-xl font-heading font-bold text-primary-900 hidden sm:inline">
                                 DSA Tracker
                             </span>
                         </Link>
+
+                        {/* Desktop Navigation */}
                         <div className="hidden md:flex gap-6">
                             <Link href="/dashboard" className="text-primary-600 font-medium border-b-2 border-primary-600">Dashboard</Link>
                             <Link href="/sheets" className="text-slate-500 hover:text-primary-600 font-medium px-3 py-1">Sheets</Link>
@@ -122,7 +128,7 @@ export default function DashboardPage() {
                             )}
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
                         <SheetSwitcher
                             sheets={sheets}
                             currentSheetId={user?.activeSheet}
@@ -132,14 +138,14 @@ export default function DashboardPage() {
 
                         <Link
                             href="/profile"
-                            className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-primary-600 transition-colors hover:bg-slate-50 rounded-lg"
+                            className="flex items-center gap-2 px-2 sm:px-4 py-2 text-slate-600 hover:text-primary-600 transition-colors hover:bg-slate-50 rounded-lg"
                         >
                             <FaUser />
                             <span className="hidden sm:inline">Profile</span>
                         </Link>
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-red-500 transition-colors hover:bg-red-50 rounded-lg"
+                            className="flex items-center gap-2 px-2 sm:px-4 py-2 text-slate-600 hover:text-red-500 transition-colors hover:bg-red-50 rounded-lg"
                         >
                             <FaSignOutAlt />
                         </button>
@@ -148,7 +154,7 @@ export default function DashboardPage() {
             </header>
 
             {/* Main Content */}
-            <main className="container mx-auto px-6 py-8">
+            <main className="container mx-auto px-4 sm:px-6 py-8">
                 {/* Welcome Section - White Theme */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

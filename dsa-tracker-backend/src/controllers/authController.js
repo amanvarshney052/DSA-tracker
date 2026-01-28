@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -210,6 +211,7 @@ const updatePassword = async (req, res) => {
 // @route   POST /api/auth/forgotpassword
 // @access  Public
 const forgotPassword = async (req, res) => {
+    console.log('Forgot Password Hit. Body:', req.body); // DEBUG
     try {
         const user = await User.findOne({ email: req.body.email });
 
@@ -217,58 +219,83 @@ const forgotPassword = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Get reset token
-        const resetToken = user.getResetPasswordToken();
+        // Generate 6 digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Hash token and set to resetPasswordToken field (using same field for OTP hash)
+        user.resetPasswordToken = crypto.createHash('sha256').update(otp).digest('hex');
+        user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
 
         await user.save({ validateBeforeSave: false });
 
-        // Create reset URL
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-        const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+        const message = `Your password reset OTP is: ${otp} \n\n It is valid for 10 minutes. \n\n If you didn't request this, please ignore this email. \n\n Please check your spam folder if you don't see this email in your inbox.`;
 
-        // In a real app, send email here. For now, log to console.
-        console.log('------------------------------------');
-        console.log('PASSWORD RESET LINK (COPY THIS):');
-        console.log(resetUrl);
-        console.log('------------------------------------');
+        console.log('Attempting to send email to:', user.email);
+        console.log('SMTP_HOST:', process.env.SMTP_HOST);
+        console.log('SMTP_USER:', process.env.SMTP_EMAIL);
+        // Do not log password
 
-        res.status(200).json({ message: 'Email sent' });
+
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'DSA Tracker - Password Reset OTP',
+                message,
+            });
+
+            res.status(200).json({ message: 'OTP sent to email. Please check your spam folder too.' });
+        } catch (error) {
+            console.error(error);
+            const fs = require('fs');
+            fs.appendFileSync('email_error.log', new Date().toISOString() + ' - ' + error.message + '\n' + JSON.stringify(error) + '\n');
+
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpire = undefined;
+
+            await user.save({ validateBeforeSave: false });
+
+            return res.status(500).json({ message: 'Email could not be sent' });
+        }
     } catch (error) {
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-        await user.save({ validateBeforeSave: false });
-        res.status(500).json({ message: 'Email could not be sent' });
+        res.status(500).json({ message: error.message });
     }
 };
 
 // @desc    Reset Password
-// @route   PUT /api/auth/resetpassword/:resettoken
+// @route   POST /api/auth/resetpassword/verify
 // @access  Public
 const resetPassword = async (req, res) => {
     try {
+        const { email, otp, password } = req.body;
+
+        if (!email || !otp || !password) {
+            return res.status(400).json({ message: 'Please provide email, OTP and new password' });
+        }
+
         // Get hashed token
         const resetPasswordToken = crypto
             .createHash('sha256')
-            .update(req.params.resettoken)
+            .update(otp)
             .digest('hex');
 
         const user = await User.findOne({
+            email,
             resetPasswordToken,
             resetPasswordExpire: { $gt: Date.now() },
         });
 
         if (!user) {
-            return res.status(400).json({ message: 'Invalid token' });
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
         }
 
         // Set new password
-        user.password = req.body.password;
+        user.password = password;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
         await user.save();
 
         res.status(200).json({
-            message: 'Password updated success',
+            message: 'Password reset successful',
             token: generateToken(user._id),
         });
     } catch (error) {

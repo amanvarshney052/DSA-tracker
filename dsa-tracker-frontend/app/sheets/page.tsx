@@ -41,7 +41,7 @@ export default function SheetsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#f4f9f4] p-6">
+        <div className="min-h-screen bg-[#f4f9f4] p-4 sm:p-6">
             <div className="container mx-auto max-w-7xl">
                 <div className="mb-8 flex items-center gap-4">
                     <Link

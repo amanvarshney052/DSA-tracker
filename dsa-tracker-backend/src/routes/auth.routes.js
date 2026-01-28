@@ -16,7 +16,7 @@ const passport = require('passport');
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/forgotpassword', forgotPassword);
-router.put('/resetpassword/:resettoken', resetPassword);
+router.post('/resetpassword/verify', resetPassword);
 router.route('/profile').get(protect, getUserProfile).put(protect, updateUserProfile);
 router.put('/updatepassword', protect, updatePassword);
 
