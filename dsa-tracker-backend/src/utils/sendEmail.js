@@ -5,16 +5,9 @@ const sendEmail = async (options) => {
     console.log('sendEmail: Starting...');
     console.log('sendEmail: Env Check -> Host:', process.env.SMTP_HOST, 'User:', process.env.SMTP_EMAIL);
 
-    const fs = require('fs');
-    const debugInfo = `
-    Time: ${new Date().toISOString()}
-    SMTP_HOST: ${process.env.SMTP_HOST}
-    SMTP_PORT: ${process.env.SMTP_PORT}
-    SMTP_EMAIL: ${process.env.SMTP_EMAIL}
-    SMTP_PASSWORD_LEN: ${process.env.SMTP_PASSWORD ? process.env.SMTP_PASSWORD.length : 'MISSING'}
-    SMTP_PASSWORD_FIRST_CHAR: ${process.env.SMTP_PASSWORD ? process.env.SMTP_PASSWORD.substring(0, 1) : 'N/A'}
-    `;
-    fs.appendFileSync('debug_email_env.txt', debugInfo);
+    // Debug logging removed for production safety (Render/Vercel read-only FS)
+    console.log(`Time: ${new Date().toISOString()}`);
+    console.log(`SMTP_HOST: ${process.env.SMTP_HOST}`);
 
 
     // 1) Create a transporter
