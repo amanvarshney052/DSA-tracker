@@ -48,4 +48,7 @@ const problemSchema = new mongoose.Schema({
     },
 });
 
+// Index for efficient sheet lookups
+problemSchema.index({ sheetId: 1 });
+
 module.exports = mongoose.model('Problem', problemSchema);

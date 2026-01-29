@@ -59,16 +59,31 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
     try {
+        console.time('loginUser:total');
         const { email, password } = req.body;
 
         // Check for user email
+        console.time('loginUser:findOne');
         const user = await User.findOne({ email }).select('+password');
+        console.timeEnd('loginUser:findOne');
 
+        console.time('loginUser:matchPassword');
         if (user && (await user.matchPassword(password))) {
+            console.log("Password matched");
+        } else {
+            console.timeEnd('loginUser:matchPassword'); // End it here if failed
+            // Also end total if failed
+            console.timeEnd('loginUser:total');
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+        console.timeEnd('loginUser:matchPassword');
+
+        if (user) {
             if (user.isBlocked) {
                 return res.status(403).json({ message: 'Your account has been blocked. Contact admin.' });
             }
 
+            console.time('loginUser:updateStats');
             // Update last active date and streak
             const today = new Date().setHours(0, 0, 0, 0);
             const lastActive = new Date(user.lastActiveDate).setHours(0, 0, 0, 0);
@@ -82,6 +97,7 @@ const loginUser = async (req, res) => {
 
             user.lastActiveDate = Date.now();
             await user.save();
+            console.timeEnd('loginUser:updateStats');
 
             res.json({
                 _id: user._id,
@@ -93,10 +109,10 @@ const loginUser = async (req, res) => {
                 hasOnboarded: user.hasOnboarded,
                 token: generateToken(user._id),
             });
-        } else {
-            res.status(401).json({ message: 'Invalid email or password' });
         }
+        console.timeEnd('loginUser:total');
     } catch (error) {
+        console.error('Login Error:', error);
         res.status(500).json({ message: error.message });
     }
 };

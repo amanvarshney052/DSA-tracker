@@ -5,28 +5,44 @@ const UserProgress = require('../models/UserProgress');
 // @desc    Get all sheets
 // @route   GET /api/sheets
 // @access  Private
+// @desc    Get all sheets
+// @route   GET /api/sheets
+// @access  Private
 const getSheets = async (req, res) => {
     try {
+        console.time('getSheets:fetchSheets');
         const sheets = await Sheet.find({ isPublic: true })
             .populate('createdBy', 'name')
             .sort({ createdAt: -1 });
+        console.timeEnd('getSheets:fetchSheets');
 
-        // Calculate progress for each sheet
-        const sheetsWithProgress = await Promise.all(sheets.map(async (sheet) => {
+        console.time('getSheets:fetchProgress');
+        // Optimization: Fetch all solved problem IDs for this user in one go
+        // instead of querying for each sheet separately.
+        const solvedProblems = await UserProgress.distinct('problemId', {
+            userId: req.user._id,
+            solved: true
+        });
+
+        // Convert ObjectIds to strings for easier comparison if needed, 
+        // though distinct usually returns what's in DB. set for O(1) lookups.
+        const solvedProblemIds = new Set(solvedProblems.map(id => id.toString()));
+        console.timeEnd('getSheets:fetchProgress');
+
+        console.time('getSheets:calcProgress');
+        // Calculate progress for each sheet in-memory
+        const sheetsWithProgress = sheets.map(sheet => {
             const sheetObj = sheet.toObject();
 
-            // Get problem IDs for this sheet
-            // Assuming sheet.problems contains ObjectIds or objects with _id
-            // If populate('problems') was used, we'd need to map to _id, but here it's likely just IDs or we need to check schema
-            // Based on getSheetById, sheet.problems seems to be populated there, but here it might be just IDs if defined in schema as ref array
-            // Let's perform a count based on the problems array
-
             if (sheet.problems && sheet.problems.length > 0) {
-                const solvedCount = await UserProgress.countDocuments({
-                    userId: req.user._id,
-                    problemId: { $in: sheet.problems },
-                    solved: true
+                // Count how many of the sheet's problems are in the solved set
+                let solvedCount = 0;
+                sheet.problems.forEach(problemId => {
+                    if (solvedProblemIds.has(problemId.toString())) {
+                        solvedCount++;
+                    }
                 });
+
                 sheetObj.solvedProblems = solvedCount;
                 sheetObj.totalProblems = sheet.problems.length;
             } else {
@@ -35,10 +51,12 @@ const getSheets = async (req, res) => {
             }
 
             return sheetObj;
-        }));
+        });
+        console.timeEnd('getSheets:calcProgress');
 
         res.json(sheetsWithProgress);
     } catch (error) {
+        console.error('getSheets Error:', error);
         res.status(500).json({ message: error.message });
     }
 };

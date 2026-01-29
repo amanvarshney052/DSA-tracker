@@ -60,5 +60,7 @@ const userProgressSchema = new mongoose.Schema({
 
 // Compound index for efficient queries
 userProgressSchema.index({ userId: 1, problemId: 1 }, { unique: true });
+// Index for progress calculation
+userProgressSchema.index({ userId: 1, solved: 1 });
 
 module.exports = mongoose.model('UserProgress', userProgressSchema);
