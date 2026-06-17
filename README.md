@@ -37,10 +37,11 @@ A powerful, full-stack application designed to help you master Data Structures &
 - **Image Generation**: html2canvas
 
 ### **Backend**
-- **Runtime**: [Node.js](https://nodejs.org/)
-- **Framework**: [Express.js](https://expressjs.com/)
-- **Database**: [MongoDB](https://www.mongodb.com/) (Mongoose ODM)
-- **Authentication**: JWT & BCrypt
+- **Language**: Java 17+
+- **Framework**: [Spring Boot 3](https://spring.io/projects/spring-boot)
+- **Security**: Spring Security & JSON Web Token (JWT)
+- **Database**: MongoDB (Spring Data MongoDB)
+- **Email Service**: Spring Boot Mail (SMTP)
 
 ---
 
@@ -61,14 +62,16 @@ cd DSA-tracker
 ### 2. Backend Setup
 ```bash
 cd dsa-tracker-backend
-npm install
 
-# Create a .env file
-# PORT=5000
+# The backend reads configurations from application.properties
+# You can set environment variables or configure src/main/resources/application.properties directly:
 # MONGODB_URI=your_mongodb_connection_string
-# JWT_SECRET=your_jwt_secret
+# JWT_SECRET=your_super_secret_key_at_least_256_bits
+# SMTP_EMAIL=your-email@gmail.com
+# SMTP_PASSWORD=your-app-password
 
-npm run dev
+# Run the Spring Boot application using Maven:
+mvn spring-boot:run
 ```
 
 ### 3. Frontend Setup

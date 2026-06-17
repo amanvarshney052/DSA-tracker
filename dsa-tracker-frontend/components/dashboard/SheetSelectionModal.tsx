@@ -25,12 +25,12 @@ export default function SheetSelectionModal({ isOpen, onSelect }: { isOpen: bool
     const handleSelect = async (sheetId: string | null) => {
         setUpdating(sheetId || 'overall');
         try {
-            // Update user profile with active sheet
             const user = JSON.parse(localStorage.getItem('user') || '{}');
-            const res = await authAPI.updateProfile({ activeSheet: sheetId, hasOnboarded: true });
+            // Send 'null' string when clearing sheet so backend recognises it
+            await authAPI.updateProfile({ activeSheet: sheetId ?? 'null', hasOnboarded: true });
 
             // Update local storage
-            localStorage.setItem('user', JSON.stringify({ ...user, activeSheet: sheetId }));
+            localStorage.setItem('user', JSON.stringify({ ...user, activeSheet: sheetId ?? null, hasOnboarded: true }));
 
             // Callback to refresh dashboard
             onSelect();

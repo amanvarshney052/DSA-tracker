@@ -37,6 +37,7 @@ export default function DashboardPage() {
     const [showSheetModal, setShowSheetModal] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+    // Immediately load from localStorage for instant render
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -52,14 +53,16 @@ export default function DashboardPage() {
             if (!localStorage.getItem('token')) return;
 
             try {
-                const profileRes = await authAPI.getProfile();
+                // ✅ PARALLEL: Fetch profile + sheets at the same time
+                const [profileRes, sheetsRes] = await Promise.all([
+                    authAPI.getProfile(),
+                    sheetsAPI.getAll(),
+                ]);
+
                 const freshUser = profileRes.data;
                 setUser(freshUser);
-                localStorage.setItem('user', JSON.stringify(freshUser));
-
-                // Fetch sheets
-                const sheetsRes = await sheetsAPI.getAll();
                 setSheets(sheetsRes.data);
+                localStorage.setItem('user', JSON.stringify(freshUser));
 
                 if (!freshUser.activeSheet && !freshUser.hasOnboarded) {
                     setShowSheetModal(true);
@@ -67,7 +70,10 @@ export default function DashboardPage() {
                     return;
                 }
 
-                const statsRes = await progressAPI.getStats(freshUser.activeSheet ? { sheetId: freshUser.activeSheet } : {});
+                // Stats fetches after we know the active sheet
+                const statsRes = await progressAPI.getStats(
+                    freshUser.activeSheet ? { sheetId: freshUser.activeSheet } : {}
+                );
                 setStats(statsRes.data);
                 setShowSheetModal(false);
             } catch (err) {
@@ -86,12 +92,9 @@ export default function DashboardPage() {
         router.push('/');
     };
 
-    if (loading && !stats) {
-        return (
-            <div className="min-h-screen bg-[#f4f9f4] flex items-center justify-center">
-                <div className="text-2xl text-slate-500 font-heading">Loading...</div>
-            </div>
-        );
+    // Show skeleton instead of blank screen while loading
+    if (loading && !user) {
+        return <DashboardSkeleton />;
     }
 
     const currentSheetName = user?.activeSheet
@@ -460,6 +463,45 @@ function DailyTargetCard({ dailyGoal, solvedToday }: { dailyGoal: number; solved
                     </div>
                 )}
             </div>
+        </div>
+    );
+}
+
+function DashboardSkeleton() {
+    return (
+        <div className="min-h-screen bg-[#f4f9f4]">
+            <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
+                <nav className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center h-16">
+                    <div className="w-32 h-8 bg-slate-100 animate-pulse rounded-lg"></div>
+                    <div className="w-48 h-8 bg-slate-100 animate-pulse rounded-lg"></div>
+                </nav>
+            </header>
+            <main className="container mx-auto px-4 sm:px-6 py-8">
+                <div className="mb-8">
+                    <div className="w-64 h-12 bg-slate-200 animate-pulse rounded-2xl mb-4"></div>
+                    <div className="w-96 h-6 bg-slate-200 animate-pulse rounded-lg"></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="bg-white rounded-[40px] p-6 shadow-sm border border-gray-100 h-40 flex flex-col justify-between">
+                            <div className="flex justify-between items-center">
+                                <div className="w-24 h-4 bg-slate-100 animate-pulse rounded"></div>
+                                <div className="w-10 h-10 bg-slate-100 animate-pulse rounded-2xl"></div>
+                            </div>
+                            <div className="w-16 h-8 bg-slate-200 animate-pulse rounded-lg"></div>
+                        </div>
+                    ))}
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div className="bg-white rounded-[40px] p-6 shadow-sm border border-gray-100 h-80 flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 bg-slate-200 animate-pulse rounded-full mb-4"></div>
+                        <div className="w-32 h-4 bg-slate-100 animate-pulse rounded"></div>
+                    </div>
+                    <div className="bg-white rounded-[40px] p-6 shadow-sm border border-gray-100 h-80 flex flex-col items-center justify-center">
+                        <div className="w-full h-48 bg-slate-100 animate-pulse rounded-2xl"></div>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 }

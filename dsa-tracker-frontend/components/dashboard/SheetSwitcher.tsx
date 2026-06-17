@@ -20,7 +20,9 @@ export default function SheetSwitcher({ sheets, currentSheetId, onSwitch, stats 
     const progress = stats?.totalProblems ? Math.round((stats.totalSolved / stats.totalProblems) * 100) : 0;
 
     const handleSwitch = async (sheetId: string | null) => {
-        if (sheetId === currentSheetId) {
+        // Use loose equality to treat null and undefined the same
+        // eslint-disable-next-line eqeqeq
+        if (sheetId == currentSheetId) {
             setIsOpen(false);
             return;
         }
@@ -28,10 +30,12 @@ export default function SheetSwitcher({ sheets, currentSheetId, onSwitch, stats 
         setSwitching(true);
         try {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
-            await authAPI.updateProfile({ activeSheet: sheetId });
-            localStorage.setItem('user', JSON.stringify({ ...user, activeSheet: sheetId }));
+            // Send 'null' string when clearing sheet so backend recognises it
+            await authAPI.updateProfile({ activeSheet: sheetId ?? 'null' });
+            const updatedUser = { ...user, activeSheet: sheetId ?? null };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
 
-            onSwitch(); // Trigger refresh
+            onSwitch(); // Trigger dashboard refresh
         } catch (error) {
             console.error('Switch failed', error);
         } finally {
@@ -46,15 +50,19 @@ export default function SheetSwitcher({ sheets, currentSheetId, onSwitch, stats 
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-3 bg-white border border-slate-200 hover:border-primary-500 hover:bg-primary-50 text-slate-700 px-4 py-1.5 rounded-xl transition-all shadow-sm active:scale-95"
+                disabled={switching}
+                className="flex items-center gap-3 bg-white border border-slate-200 hover:border-primary-500 hover:bg-primary-50 text-slate-700 px-4 py-1.5 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-60 disabled:cursor-wait"
             >
                 <div className="bg-primary-50 p-1.5 rounded-lg text-primary-500">
-                    <FaBookOpen className="text-sm" />
+                    {switching
+                        ? <div className="w-[14px] h-[14px] border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                        : <FaBookOpen className="text-sm" />
+                    }
                 </div>
 
                 <div className="flex flex-col items-start text-left w-[140px]">
                     <span className="font-bold text-xs text-slate-900 truncate w-full mb-0.5">
-                        {currentSheet?.name || 'Overall Progress'}
+                        {switching ? 'Switching...' : (currentSheet?.name || 'Overall Progress')}
                     </span>
                     <div className="flex items-center gap-2 w-full">
                         <div className="h-1 flex-1 bg-slate-100 rounded-full overflow-hidden">
@@ -120,5 +128,3 @@ export default function SheetSwitcher({ sheets, currentSheetId, onSwitch, stats 
     );
 }
 
-// Helper var for loading check (not defined above but inferred)
-const loading = false;

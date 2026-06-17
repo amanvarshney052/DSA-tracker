@@ -1,8 +1,36 @@
-node_modules
+# ===========================
+# Dependencies
+# ===========================
+node_modules/
+
+# ===========================
+# Environment Variables
+# ===========================
 .env
 .env.local
+.env.*.local
+
+# ===========================
+# OS / Editor
+# ===========================
 .DS_Store
-dist
-build
-.next
-.vscode
+Thumbs.db
+.vscode/
+.idea/
+
+# ===========================
+# Frontend (Next.js)
+# ===========================
+dsa-tracker-frontend/.next/
+dsa-tracker-frontend/out/
+dsa-tracker-frontend/.vercel
+dsa-tracker-frontend/tsconfig.tsbuildinfo
+
+# ===========================
+# Backend (Spring Boot / Maven)
+# ===========================
+dsa-tracker-backend/target/
+*.log
+*.class
+*.jar
+*.war

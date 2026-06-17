@@ -18,7 +18,7 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
 
     const handleGoogleLogin = () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/google`;
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api'}/auth/google`;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -32,6 +32,7 @@ export default function RegisterPage() {
             localStorage.setItem('user', JSON.stringify(response.data));
             router.push('/dashboard');
         } catch (err: any) {
+            console.error('Registration Error:', err);
             setError(err.response?.data?.message || 'Registration failed');
         } finally {
             setLoading(false);
