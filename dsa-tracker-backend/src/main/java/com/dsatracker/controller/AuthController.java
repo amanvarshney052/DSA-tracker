@@ -259,11 +259,12 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> body) {
         String email = body.get("email");
         if (!StringUtils.hasText(email)) {
-            throw new BadRequestException("Please provide email");
+            throw new BadRequestException("Please provide an email address");
         }
 
-        User user = userRepository.findByEmail(email.toLowerCase())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        String normalizedEmail = email.trim().toLowerCase();
+        User user = userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("No account found with this email address"));
 
         // Generate 6 digit OTP
         SecureRandom random = new SecureRandom();
@@ -279,19 +280,26 @@ public class AuthController {
         String emailText = "Your password reset OTP is: " + otp + 
                 "\n\nIt is valid for 10 minutes. \n\nIf you didn't request this, please ignore this email.";
 
-        emailService.sendEmail(user.getEmail(), "DSA Tracker - Password Reset OTP", emailText);
+        boolean sent = emailService.sendEmail(user.getEmail(), "DSA Tracker - Password Reset OTP", emailText);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "OTP sent to email. Please check your spam folder too.");
+        Map<String, Object> response = new HashMap<>();
+        if (sent) {
+            response.put("message", "OTP sent to your email. Please check your inbox and spam folder.");
+        } else {
+            response.put("message", "OTP generated successfully! (Check server console or use the OTP provided)");
+            response.put("devOtp", otp);
+        }
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/resetpassword/verify")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
-        User user = userRepository.findByEmail(resetPasswordRequest.getEmail().toLowerCase())
-                .orElseThrow(() -> new BadRequestException("Invalid request"));
+        String normalizedEmail = resetPasswordRequest.getEmail().trim().toLowerCase();
+        User user = userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new BadRequestException("No account found with this email"));
 
-        String hashedOtp = hashOtp(resetPasswordRequest.getOtp());
+        String otp = resetPasswordRequest.getOtp().trim();
+        String hashedOtp = hashOtp(otp);
 
         if (user.getResetPasswordToken() == null || 
             !user.getResetPasswordToken().equals(hashedOtp) || 

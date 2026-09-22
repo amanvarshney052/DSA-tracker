@@ -8,6 +8,7 @@ import { authAPI } from '@/lib/services';
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('');
+    const [devOtp, setDevOtp] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
 
@@ -15,11 +16,18 @@ export default function ForgotPasswordPage() {
         e.preventDefault();
         setStatus('loading');
         setMessage('');
+        setDevOtp('');
 
         try {
-            await authAPI.forgotPassword(email);
+            const res = await authAPI.forgotPassword(email);
             setStatus('success');
-            setMessage('Password reset link sent! Check your server console (local dev).');
+            const otpCode = res.data?.devOtp;
+            if (otpCode) {
+                setDevOtp(otpCode);
+                setMessage(res.data?.message || 'OTP generated successfully!');
+            } else {
+                setMessage(res.data?.message || 'Password reset link sent! Check your inbox or spam folder.');
+            }
         } catch (err: any) {
             setStatus('error');
             setMessage(err.response?.data?.message || 'Failed to send reset link');
@@ -56,14 +64,20 @@ export default function ForgotPasswordPage() {
                             <p className="text-slate-500">
                                 {message}
                             </p>
+                            {devOtp && (
+                                <div className="bg-primary-50 border border-primary-200 rounded-2xl p-4 text-center">
+                                    <p className="text-xs uppercase font-bold text-primary-700 tracking-wider mb-1">Your Reset OTP Code</p>
+                                    <p className="text-3xl font-mono font-extrabold text-primary-900 tracking-widest">{devOtp}</p>
+                                </div>
+                            )}
                             <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-sm border border-yellow-200">
-                                <strong>Tip:</strong> If you don't see the email, please check your <strong>Spam</strong> or <strong>Junk</strong> folder.
+                                <strong>Tip:</strong> If using a real email server, please check your <strong>Spam</strong> or <strong>Junk</strong> folder.
                             </div>
                             <Link
-                                href={`/reset-password?email=${encodeURIComponent(email)}`}
+                                href={`/reset-password?email=${encodeURIComponent(email)}${devOtp ? `&otp=${encodeURIComponent(devOtp)}` : ''}`}
                                 className="block w-full bg-primary-600 hover:bg-primary-700 text-white rounded-xl py-3 font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all mt-6"
                             >
-                                Enter OTP
+                                Enter OTP & Reset Password
                             </Link>
                         </div>
                     ) : (

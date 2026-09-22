@@ -11,9 +11,10 @@ function ResetPasswordContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const emailParam = searchParams.get('email') || '';
+    const otpParam = searchParams.get('otp') || '';
 
     const [email, setEmail] = useState(emailParam);
-    const [otp, setOtp] = useState('');
+    const [otp, setOtp] = useState(otpParam);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
